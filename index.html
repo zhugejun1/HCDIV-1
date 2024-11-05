@@ -38,12 +38,17 @@
   </table>  
 
   <script>  
-    const apiUrl = 'https://api-open.data.gov.sg/v2/real-time/api/two-hr-forecast';  
+    const apiUrl = 'https://api.data.gov.sg/v1/environment/2-hour-weather-forecast';  
 
     function updateWeatherTable() {  
       fetch(apiUrl)  
         .then(response => response.json())  
         .then(data => {  
+          // 添加错误处理和数据检查  
+          if (!data.items || !data.items[0] || !data.items[0].forecasts) {  
+            throw new Error('Invalid data structure received from API');  
+          }  
+          
           const weatherData = data.items[0].forecasts;  
           const tableBody = document.getElementById('weather-table').getElementsByTagName('tbody')[0];  
           tableBody.innerHTML = '';  
@@ -53,7 +58,7 @@
             const locationCell = document.createElement('td');  
             const weatherCell = document.createElement('td');  
 
-            locationCell.textContent = forecast.location;  
+            locationCell.textContent = forecast.area;  // 注意：API返回的是 'area' 而不是 'location'  
             weatherCell.textContent = forecast.forecast;  
 
             row.appendChild(locationCell);  
@@ -63,6 +68,9 @@
         })  
         .catch(error => {  
           console.error('Error fetching weather data:', error);  
+          // 在页面上显示错误信息  
+          const tableBody = document.getElementById('weather-table').getElementsByTagName('tbody')[0];  
+          tableBody.innerHTML = `<tr><td colspan="2">Error loading weather data: ${error.message}</td></tr>`;  
         });  
     }  
 
@@ -73,4 +81,4 @@
     updateWeatherTable();  
   </script>  
 </body>  
-</html>  
+</html>
